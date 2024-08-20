@@ -23,7 +23,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.11
 
       - name: Random sleep
         if: github.event_name == 'schedule'
