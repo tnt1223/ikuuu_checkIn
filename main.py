@@ -48,7 +48,6 @@ def qqemail(subject,text):
     EMAIL_PASSWORD=SMTP
 
     import smtplib
-    smtp=smtplib.SMTP('smtp.qq.com',25)
 
     import ssl
     context=ssl.create_default_context()
