@@ -37,5 +37,6 @@ jobs:
         env:
           URL: ${{ secrets.URL }}
           INFO: ${{ secrets.INFO }}
+          SMTP: ${{ secrets.SMTP}}
         run: |
           python3 ./main.py
