@@ -34,12 +34,14 @@ def checkIn(email, passwd, SMTP):
             qqemail('ikuuu签到',content)
             print('推送成功')
         session.get(logout_url)
+        content='签到成功'
     except:
         content = '签到失败'
         print(content)
         if SMTP != '':
             qqemail('ikuuu签到',content)
         session.get(logout_url)
+    return content
 
 def qqemail(subject,text):
     #无需安装第三方库
@@ -71,9 +73,20 @@ def qqemail(subject,text):
 if __name__ == '__main__':
     split = os.environ.get('INFO').split(',')
 
+if __name__ == '__main__':
+    split = os.environ.get('INFO').split(',')
+
     for user in split:
         user_split = user.split('<split>')
         email = user_split[0]
         password = user_split[1]
-        checkIn(email, password, SMTP)
+        #当content为‘签到失败’时，继续尝试登录
+        while True:
+            content = checkIn(email, password, SMTP)
+            if content == '签到成功':
+                break
+            else:
+                print('登录失败，重新登录...')
+                
         time.sleep(2)
+    
