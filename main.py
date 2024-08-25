@@ -35,7 +35,8 @@ def checkIn(email, passwd, SMTP):
             print('推送成功')
         session.get(logout_url)
         content='签到成功'
-    except:
+    except Exception as e:
+        print(e)
         content = '签到失败'
         print(content)
         if SMTP != '':
