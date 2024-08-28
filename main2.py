@@ -1,6 +1,6 @@
 from urllib import parse
 from urllib.request import getproxies
-
+import os
 from pyrogram import Client 
 import asyncio
 # 允许嵌套事件循环
