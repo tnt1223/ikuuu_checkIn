@@ -6,8 +6,9 @@ import asyncio
 # 允许嵌套事件循环
 
 task = [(820670338,'/checkin'),
-        ]
-
+        (745814644,'/checkin'),
+        (6042960290,'/sign'),
+        (6005833864,'/sign')]
 
 def get_api_config():
     api_id = int(os.environ.get("TG_API_ID", 611335))
