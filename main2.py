@@ -16,11 +16,12 @@ def get_api_config():
 
 async def main():
     api_id, api_hash = get_api_config()
-    async with Client("my_account", api_id, api_hash) as app:
+    async with Client("my_account", api_id, api_hash,proxy=None or get_proxy()) as app:
         for id,text in task:
+            async for chat in  app.get_dialogs(20):
+                print(chat.chat.id,chat.chat.first_name)
             await app.send_message(id, text)
             print(f"Send {text} to {id}")
-        
 
 
 
