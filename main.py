@@ -73,10 +73,7 @@ def qqemail(subject,text):
 
 if __name__ == '__main__':
     split = os.environ.get('INFO').split(',')
-
-if __name__ == '__main__':
-    split = os.environ.get('INFO').split(',')
-
+    test = input()
     for user in split:
         user_split = user.split('<split>')
         email = user_split[0]
