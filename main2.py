@@ -7,17 +7,7 @@ import asyncio
 
 task = [(820670338,'/checkin'),
         ]
-def get_proxy():
-    if tg_proxy:=getproxies()['tg']:
-        r = parse.urlparse(tg_proxy)
-        proxies = {
-            "scheme": r.scheme,
-            "hostname": r.hostname,
-            "port": r.port,
-            "username": r.username,
-            "password": r.password,
-        }
-        return proxies
+
 
 def get_api_config():
     api_id = int(os.environ.get("TG_API_ID", 611335))
@@ -26,7 +16,7 @@ def get_api_config():
 
 async def main():
     api_id, api_hash = get_api_config()
-    async with Client("my_account", api_id, api_hash,proxy=None or get_proxy()) as app:
+    async with Client("my_account", api_id, api_hash) as app:
         for id,text in task:
             await app.send_message(id, text)
             print(f"Send {text} to {id}")
