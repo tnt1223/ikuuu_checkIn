@@ -55,8 +55,7 @@ def qqemail(subject,text):
     import ssl
     context=ssl.create_default_context()
     sender=EMAIL_ADDRESS               #发件邮箱
-    receiver=EMAIL_ADDRESS#"255576170@qq.com"#EMAIL_ADDRESS
-                                          #收件邮箱
+    receiver=EMAIL_ADDRESS#"发送到自己邮箱
     from email.message import EmailMessage
     subject=subject
     body=text
