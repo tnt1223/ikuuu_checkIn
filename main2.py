@@ -3,10 +3,8 @@ from urllib.request import getproxies
 import os
 from pyrogram import Client
 import asyncio
-import dotenv
 
 # 允许嵌套事件循环
-dotenv.load_dotenv()
 task = [
     (820670338, "/checkin"),
     (745814644, "/checkin"),
