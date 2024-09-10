@@ -39,4 +39,4 @@ jobs:
           INFO: ${{ secrets.INFO }}
           SMTP: ${{ secrets.SMTP}}
         run: |
-          python3 ./main2.py
+          python3 ./test.py
