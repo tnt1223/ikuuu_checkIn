@@ -40,3 +40,10 @@ jobs:
           SMTP: ${{ secrets.SMTP}}
         run: |
           python3 ./test.py
+
+      - name: upload result
+        uses: actions/upload-artifact@v1
+        with:
+          name: my-artifact
+          path: ${{ github.workspace }}/result.xlsx
+  
