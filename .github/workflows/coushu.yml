@@ -1,8 +1,6 @@
-name: "Airport Checkin"
+name: "coushu"
 
-on:
-  schedule:
-    - cron: "15 16 * * *"  # scheduled at 00:15 (UTC+8) everyday
+on:  # scheduled at 00:15 (UTC+8) everyday
   workflow_dispatch:
 
 env:
@@ -25,21 +23,18 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Random sleep
-        if: github.event_name == 'schedule'
-        run: sleep $(shuf -i 10-100 -n 1)
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements_cs.txt
       - name: Run sign
-        env:
-          URL: ${{ secrets.URL }}
-          INFO: ${{ secrets.INFO }}
-          SMTP: ${{ secrets.SMTP}}
+
         run: |
-          python3 ./main2.py
+          python3 ./test.py
 
-
+      - name: upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: ${{ github.workspace }}/result.xlsx
   
