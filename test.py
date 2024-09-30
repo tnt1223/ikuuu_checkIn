@@ -3,7 +3,7 @@ from ortools.sat.python import cp_model
 
 df_raw = pd.read_excel('data.xlsx', header=None, usecols=[1])
 
-target = 6791132.5
+target = 177797.37
 factor = 100
 df = df_raw.astype(float) * factor
 df[1] = df[1].round().astype(int)
