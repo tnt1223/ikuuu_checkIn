@@ -1,7 +1,7 @@
 import pandas as pd
 from ortools.sat.python import cp_model
 
-df_raw = pd.read_excel('data.xlsx', header=None, usecols=[1])
+df_raw = pd.read_excel('ikuuu_checkIn/data.xlsx', header=None, usecols=[1])
 
 target = 177797.37
 factor = 100
@@ -26,4 +26,4 @@ else:
     print('未找到最优解')
 
 df['result'] = df['x'].apply(solver.Value)
-df.to_excel('result.xlsx', index=False, header=False)
+df.drop('x').to_excel('result.xlsx', index=True, header=True)
