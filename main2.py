@@ -10,6 +10,7 @@ task = [
     (745814644, "/checkin"),
     (6042960290, '/sign'),
     (7780250809, '/sign'),
+    # (871838903, '🎲'),
     # (6005833864, "/sign"),
 ]
 
@@ -28,6 +29,7 @@ async def main():
         for id, text in task:
             await app.send_message(id, text)
             print(f"Send {text} to {id}")
+        await app.send_dice(871838903, emoji="🎲")
 
 
 asyncio.run(main())
