@@ -29,7 +29,7 @@ async def main():
         for id, text in task:
             await app.send_message(id, text)
             print(f"Send {text} to {id}")
-        app.send_dice(871838903, emoji="🎲")
+        await app.send_dice(871838903, emoji="🎲")
 
 
 asyncio.run(main())
