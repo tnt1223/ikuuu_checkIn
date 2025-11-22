@@ -23,27 +23,12 @@ def get_api_config():
 
 async def main():
     api_id, api_hash = get_api_config()
-    system_proxies = getproxies()
-    proxy = None
-
-    if "http" in system_proxies:
-        proxy_url = system_proxies["http"]
-        parsed = parse.urlparse(proxy_url)
-
-        proxy = {
-            "scheme": "http",
-            "hostname": parsed.hostname,
-            "port": parsed.port,
-            "username": parsed.username,  # 如果有的话
-            "password": parsed.password,  # 如果有的话
-        }
-    async with Client("my_account1", proxy=proxy) as app:
+    async with Client("my_account", api_id, api_hash) as app:
         # async for chat in app.get_dialogs():
         #     print(chat.chat.id, chat.chat.first_name)
-        #     print(chat)
-        # for id, text in task:
-        #     await app.send_message(id, text)
-        #     print(f"Send {text} to {id}")
+        for id, text in task:
+            await app.send_message(id, text)
+            print(f"Send {text} to {id}")
         await app.send_dice(871838903, emoji="🎲")
         print("Send dice to 871838903")
 
