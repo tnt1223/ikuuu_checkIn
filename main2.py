@@ -1,7 +1,7 @@
 from urllib import parse
 from urllib.request import getproxies
 import os
-from pyrogram.client import Client
+from pyrogram import Client
 import asyncio
 
 # 允许嵌套事件循环
@@ -30,8 +30,6 @@ async def main():
             await app.send_message(id, text)
             print(f"Send {text} to {id}")
         await app.send_dice(871838903, emoji="🎲")
-        print("Send dice to 871838903")
 
 
-print('-' * 20)
 asyncio.run(main())
