@@ -6,9 +6,10 @@ import asyncio
 
 # 允许嵌套事件循环
 task = [
-    (820670338, "/checkin"),
+    # (820670338, "/checkin"),
     (745814644, "/checkin"),
     (6042960290, '/sign'),
+    (-1001301342610, "/checkin"),
     # (7780250809, '/sign'),
     # (871838903, '🎲'),
     # (6005833864, "/sign"),
@@ -25,7 +26,7 @@ async def main():
     api_id, api_hash = get_api_config()
     async with Client("my_account", api_id, api_hash) as app:
         async for chat in app.get_dialogs():
-            print(chat.chat.id, chat.chat.first_name)
+            print(chat.chat.id, chat.chat.first_name or chat.chat.title)
         for id, text in task:
             await app.send_message(id, text)
             print(f"Send {text} to {id}")
