@@ -361,8 +361,42 @@ def _analyze_hours(hours):
     return False, ""
 
 
+def is_workday():
+    """判断今天是否为工作日（含调休），使用 timor.tech 免费API
+    type: 0=工作日, 1=周末休息, 2=节假日休息, 3=调休补班
+    返回 True 表示需要上班，False 表示休息日
+    """
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    try:
+        resp = requests.get(
+            f"https://timor.tech/api/holiday/info/{today_str}",
+            timeout=10,
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        if data.get("code") == 0:
+            day_type = data["type"]["type"]
+            type_name = data["type"]["name"]
+            print(f"📅 今日 {today_str} 判定为: {type_name} (type={day_type})")
+            # type 0=工作日, 3=调休补班 → 上班; 1=周末, 2=节假日 → 休息
+            return day_type in (0, 3)
+        else:
+            print(f"⚠️ 节假日API返回异常: {data}，默认按工作日处理")
+            return True
+    except Exception as e:
+        print(f"⚠️ 节假日API请求失败: {e}，默认按工作日处理")
+        return True
+
+
 def main():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 开始获取天气...")
+
+    # 节假日判断：休息日跳过
+    if not is_workday():
+        print("🎉 今天是休息日，无需通勤提醒，跳过发送。")
+        return
+
     daily_data, morning_hours, evening_hours = fetch_weather()
 
     print(
