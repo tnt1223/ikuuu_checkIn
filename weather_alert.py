@@ -37,7 +37,12 @@ EVENING_START, EVENING_END = 18, 21  # 回家：18~21点
 # ============================
 
 
-def fetch_weather():
+def fetch_weather(
+    morning_start=MORNING_START,
+    morning_end=MORNING_END,
+    evening_start=EVENING_START,
+    evening_end=EVENING_END,
+):
     """从 Open-Meteo 获取今日逐小时+全天天气（免费，无需API Key）"""
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
@@ -104,8 +109,8 @@ def fetch_weather():
                 )
         return records
 
-    morning_hours = extract_hourly_range(MORNING_START, MORNING_END)
-    evening_hours = extract_hourly_range(EVENING_START, EVENING_END)
+    morning_hours = extract_hourly_range(morning_start, morning_end)
+    evening_hours = extract_hourly_range(evening_start, evening_end)
 
     # ---------- 解析全天数据 ----------
     daily = data["daily"]
@@ -163,46 +168,64 @@ def weathercode_desc(code):
 def _build_hourly_table(hours, label):
     """构建某个通勤时段的逐小时HTML表格"""
     if not hours:
-        return f'<div style="text-align: center; padding: 20px; color: #706C64; font-size: 14px; background-color: #F8F7F5; border: 1px solid #EAE8E1; border-radius: 8px;">暂无{label}数据</div>'
+        return f'<div style="text-align: center; padding: 22px; color: #6B7477; font-size: 14px; background-color: #F7FAF8; border: 1px solid #DFE8E3; border-radius: 8px;">暂无{label}数据</div>'
 
     rows = ""
-    for h in hours:
+    for i, h in enumerate(hours):
         precip_prob = h['precip_prob']
         uv = h['uv_index']
-
-        precip_color = "#C35338" if precip_prob >= 50 else "#706C64"
-        precip_fw = "600" if precip_prob >= 50 else "400"
-        uv_color = "#B57A1E" if uv >= UV_THRESHOLD else "#706C64"
-        uv_fw = "600" if uv >= UV_THRESHOLD else "400"
+        precip_color = "#B74235" if precip_prob >= 50 else "#536268"
+        precip_bg = "#FFF1EE" if precip_prob >= 50 else "#F7FAF8"
+        precip_fw = "700" if precip_prob >= 50 else "500"
+        uv_color = "#A86514" if uv >= UV_THRESHOLD else "#536268"
+        uv_fw = "700" if uv >= UV_THRESHOLD else "500"
         gust_color = (
-            "#B55A1E" if h['wind_gust'] >= WIND_GUST_THRESHOLD else "#706C64"
+            "#A86514" if h['wind_gust'] >= WIND_GUST_THRESHOLD else "#536268"
         )
+        row_bg = "#FFFFFF" if i % 2 == 0 else "#FAFCFB"
+        rows += f"""<tr style="background-color: {row_bg};">
+              <td style="padding: 13px 12px; text-align: left; border-bottom: 1px solid #E8EFEB; font-weight: 700; color: #1F2A2E; white-space: nowrap;">{h['hour']}:00</td>
+              <td style="padding: 13px 12px; text-align: left; border-bottom: 1px solid #E8EFEB; color: #263237; font-weight: 600;">{weathercode_desc(h['weathercode'])}<br><span style="color: #6B7477; font-size: 12px; font-weight: 500;">{h['temp']}°C</span></td>
+              <td style="padding: 13px 12px; text-align: center; border-bottom: 1px solid #E8EFEB;"><span style="display: inline-block; min-width: 54px; padding: 4px 8px; border-radius: 6px; background-color: {precip_bg}; color: {precip_color}; font-weight: {precip_fw};">{precip_prob}%</span><br><span style="color: #7B8588; font-size: 12px; font-weight: 500;">{h['precip']}mm</span></td>
+              <td style="padding: 13px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; color: {uv_color}; font-weight: {uv_fw};">{uv}</td>
+              <td style="padding: 13px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; color: {gust_color}; font-size: 13px; font-weight: 600;">{h['wind_gust']}<span style="font-size:11px; color: #7B8588;">km/h</span></td>
+            </tr>"""
 
-        rows += f"""<tr>
-  <td style="padding: 12px 6px; text-align: center; border-bottom: 1px solid #F0EEE9; font-weight: 500; color: #2D2A26;">{h['hour']}:00</td>
-  <td style="padding: 12px 6px; text-align: center; border-bottom: 1px solid #F0EEE9; color: #4B4944;">{weathercode_desc(h['weathercode'])}<br><span style="color: #8C887F; font-size: 11px;">{h['temp']}°C</span></td>
-  <td style="padding: 12px 6px; text-align: center; border-bottom: 1px solid #F0EEE9; color: {precip_color}; font-weight: {precip_fw};">{precip_prob}%<br><span style="color: #9C988F; font-size: 11px; font-weight: 400;">{h['precip']}mm</span></td>
-  <td style="padding: 12px 6px; text-align: center; border-bottom: 1px solid #F0EEE9; color: {uv_color}; font-weight: {uv_fw};">{uv}</td>
-  <td style="padding: 12px 6px; text-align: center; border-bottom: 1px solid #F0EEE9; color: {gust_color}; font-size: 12px;">{h['wind_gust']}<span style="font-size:10px;">km/h</span></td>
-</tr>"""
-
-    return f"""<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 13px; background-color: #FFFFFF; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-<thead>
-  <tr style="background-color: #F8F7F5;">
-    <th style="padding: 10px 6px; font-weight: 600; color: #524F4A; text-align: center; border-bottom: 1px solid #EAE8E1;">时间</th>
-    <th style="padding: 10px 6px; font-weight: 600; color: #524F4A; text-align: center; border-bottom: 1px solid #EAE8E1;">天气</th>
-    <th style="padding: 10px 6px; font-weight: 600; color: #524F4A; text-align: center; border-bottom: 1px solid #EAE8E1;">降水</th>
-    <th style="padding: 10px 6px; font-weight: 600; color: #524F4A; text-align: center; border-bottom: 1px solid #EAE8E1;">UV</th>
-    <th style="padding: 10px 6px; font-weight: 600; color: #524F4A; text-align: center; border-bottom: 1px solid #EAE8E1;">阵风</th>
-  </tr>
-</thead>
-<tbody>{rows}</tbody>
-</table>"""
+    return f"""<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 14px; background-color: #FFFFFF; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <thead>
+            <tr style="background-color: #EEF5F1;">
+              <th style="padding: 11px 12px; font-weight: 700; color: #536268; text-align: left; border-bottom: 1px solid #D8E5DE;">时间</th>
+              <th style="padding: 11px 12px; font-weight: 700; color: #536268; text-align: left; border-bottom: 1px solid #D8E5DE;">天气</th>
+              <th style="padding: 11px 12px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">降水</th>
+              <th style="padding: 11px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">UV</th>
+              <th style="padding: 11px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">阵风</th>
+            </tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>"""
 
 
-def send_email(daily_data, morning_hours, evening_hours, decisions):
+def send_email(
+    daily_data,
+    morning_hours,
+    evening_hours,
+    decisions,
+    morning_start=MORNING_START,
+    morning_end=MORNING_END,
+    evening_start=EVENING_START,
+    evening_end=EVENING_END,
+    is_workday=True,
+):
     """通过QQ邮箱发送美化天气邮件"""
     date_str = daily_data["date"]
+
+    # --- 时段标签 ---
+    if is_workday:
+        morning_label = "🌅 早间通勤"
+        evening_label = "🌇 晚间通勤"
+    else:
+        morning_label = "☀️ 白天出门"
+        evening_label = "🌙 晚间出门"
 
     # --- 逻辑关联与邮件标题 ---
     has_rain = decisions["need_umbrella"]
@@ -222,97 +245,170 @@ def send_email(daily_data, morning_hours, evening_hours, decisions):
         f" — {' / '.join(alert_parts)}" if alert_parts else " — 今日爽朗"
     )
 
-    # --- 建议模块重构 (Claude 护眼色彩系统) ---
+    if alert_parts:
+        main_status = " / ".join(alert_parts)
+        status_note = "今天出门前请优先处理这些事项。"
+    else:
+        main_status = "今日爽朗"
+        status_note = "通勤时段暂无明显降水、防晒或大风风险。"
+
+    def recommendation_card(kicker, title, detail, bg, border, accent, text):
+        return f"""<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 10px; border-collapse: separate; border-spacing: 0;">
+          <tr>
+            <td style="background-color: {bg}; border: 1px solid {border}; border-left: 4px solid {accent}; border-radius: 8px; padding: 13px 15px;">
+              <span style="display: block; color: {accent}; font-size: 11px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 4px;">{kicker}</span>
+              <strong style="display: block; color: #1F2A2E; font-size: 15px; line-height: 1.45; margin-bottom: 3px;">{title}</strong>
+              <span style="display: block; color: {text}; font-size: 13px; line-height: 1.65;">{detail}</span>
+            </td>
+          </tr>
+        </table>"""
+
+    def metric_cell(label, value, helper, value_color="#1F2A2E"):
+        return f"""<td width="48%" valign="top" style="background-color: #F7FAF8; border: 1px solid #DFE8E3; border-radius: 8px; padding: 14px 15px;">
+          <span style="display: block; color: #6B7477; font-size: 12px; line-height: 1.3; margin-bottom: 6px;">{label}</span>
+          <strong style="display: block; color: {value_color}; font-size: 20px; line-height: 1.2; font-weight: 800;">{value}</strong>
+          <span style="display: block; color: #7B8588; font-size: 12px; line-height: 1.45; margin-top: 5px;">{helper}</span>
+        </td>"""
+
+    # --- 建议模块 ---
     recs_html = ""
 
     # 1. 降水建议
     if has_rain:
         if has_wind:
-            recs_html += f'<div style="background-color: #FCF9F7; border: 1px solid #F0DFDA; border-left: 4px solid #D47963; padding: 12px 16px; margin-bottom: 12px; border-radius: 8px; font-size: 14px;"><strong style="color: #8C4735; display: block; margin-bottom: 4px; font-weight: 600;">🧥 需防雨 (风大，雨伞易失效)</strong><span style="color: #A36453;">{decisions["umbrella_reason"]}。且阵风达 {decisions["max_gust"]}km/h，强烈建议穿防水雨衣/防风外套。</span></div>'
+            recs_html += recommendation_card(
+                "rain + wind",
+                "风雨同时出现，优先穿防水外套",
+                f'{decisions["umbrella_reason"]}。阵风达 {decisions["max_gust"]}km/h，雨伞可能不太好用。',
+                "#FFF3EF",
+                "#F1D1C8",
+                "#B74235",
+                "#894239",
+            )
         else:
-            recs_html += f'<div style="background-color: #FCF9F7; border: 1px solid #F0DFDA; border-left: 4px solid #D47963; padding: 12px 16px; margin-bottom: 12px; border-radius: 8px; font-size: 14px;"><strong style="color: #8C4735; display: block; margin-bottom: 4px; font-weight: 600;">☔ 需带雨伞</strong><span style="color: #A36453;">{decisions["umbrella_reason"]}</span></div>'
+            recs_html += recommendation_card(
+                "rain",
+                "带伞出门更稳妥",
+                decisions["umbrella_reason"],
+                "#FFF3EF",
+                "#F1D1C8",
+                "#B74235",
+                "#894239",
+            )
 
     # 2. 纯大风建议
     if has_wind and not has_rain:
-        recs_html += f'<div style="background-color: #FDFCFA; border: 1px solid #EBE4D5; border-left: 4px solid #D5A651; padding: 12px 16px; margin-bottom: 12px; border-radius: 8px; font-size: 14px;"><strong style="color: #927438; display: block; margin-bottom: 4px; font-weight: 600;">💨 阵风较大 ({decisions["max_gust"]}km/h)</strong><span style="color: #A88741;">风力较强，出行建议穿防风外套，注意高空坠物。</span></div>'
+        recs_html += recommendation_card(
+            "wind",
+            f'阵风较大，峰值 {decisions["max_gust"]}km/h',
+            "出行建议穿防风外套，路上注意高空坠物和骑行安全。",
+            "#FFF8E8",
+            "#EAD8AF",
+            "#A86514",
+            "#7A541F",
+        )
 
     # 3. 防晒建议
     if has_sun:
         if has_wind:
-            recs_html += f'<div style="background-color: #FDFBEE; border: 1px solid #EAE2CA; border-left: 4px solid #D5A651; padding: 12px 16px; margin-bottom: 12px; border-radius: 8px; font-size: 14px;"><strong style="color: #927438; display: block; margin-bottom: 4px; font-weight: 600;">🧴 需防晒 (建议涂防晒霜/戴帽子)</strong><span style="color: #A88741;">UV达 {decisions["max_uv"]}。由于今日阵风较大，撑遮阳伞出行不便，建议换用其他防晒方式。</span></div>'
+            recs_html += recommendation_card(
+                "uv",
+                "紫外线偏高，建议涂防晒或戴帽子",
+                f'UV 达 {decisions["max_uv"]}。今天风偏大，遮阳伞不一定方便。',
+                "#FFF8E8",
+                "#EAD8AF",
+                "#A86514",
+                "#7A541F",
+            )
         else:
-            recs_html += f'<div style="background-color: #FDFBEE; border: 1px solid #EAE2CA; border-left: 4px solid #D5A651; padding: 12px 16px; margin-bottom: 12px; border-radius: 8px; font-size: 14px;"><strong style="color: #927438; display: block; margin-bottom: 4px; font-weight: 600;">⛱️ 需带遮阳伞 (UV {decisions["max_uv"]})</strong><span style="color: #A88741;">紫外线指数较高，出门建议携带遮阳伞或涂抹防晒霜。</span></div>'
+            recs_html += recommendation_card(
+                "uv",
+                f'需要防晒，UV {decisions["max_uv"]}',
+                "紫外线指数较高，出门建议带遮阳伞或涂抹防晒霜。",
+                "#FFF8E8",
+                "#EAD8AF",
+                "#A86514",
+                "#7A541F",
+            )
 
     if not recs_html:
-        recs_html = '<div style="background-color: #F6F9F6; border: 1px solid #DFEBE1; border-left: 4px solid #6D9E77; padding: 12px 16px; margin-bottom: 12px; border-radius: 8px; font-size: 14px;"><strong style="color: #4B6E55; display: block; margin-bottom: 4px; font-weight: 600;">✅ 天气怡人</strong><span style="color: #658A70;">今日天气良好，无极端天气，安心出门！</span></div>'
+        recs_html = recommendation_card(
+            "clear",
+            "天气怡人，轻装出门",
+            "今日无明显降水、防晒或大风提醒，按日常装备出门即可。",
+            "#F2F8F3",
+            "#D5E7D8",
+            "#4F7F5C",
+            "#4F7458",
+        )
+
+    precip_value_color = (
+        "#B74235" if daily_data["precip_prob_max"] >= 50 else "#1F2A2E"
+    )
+    uv_value_color = (
+        "#A86514" if daily_data["uv_index_max"] >= UV_THRESHOLD else "#1F2A2E"
+    )
 
     # --- 核心 HTML 结构 ---
     body = f"""<!DOCTYPE html>
 <html lang="zh-CN">
-<body style="margin: 0; padding: 0; background-color: #F4F3ED; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #2D2A26;">
-  <!-- 居中主容器 -->
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 32px auto; background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); border: 1px solid #EAE8E1;">
-    <!-- 头部 -->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>天气提醒 {date_str}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #EAF1EE; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #1F2A2E;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #EAF1EE;">
     <tr>
-      <td style="background-color: #FAF9F6; padding: 32px 24px 24px; text-align: center; border-bottom: 1px solid #EAE8E1;">
-        <h1 style="margin: 0 0 8px 0; color: #2D2A26; font-size: 26px; font-weight: 500; font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif; letter-spacing: -0.3px;">🌤️ 每日天气提醒</h1>
-        <p style="margin: 0; color: #706C64; font-size: 14px; font-weight: 400;">{date_str} &nbsp;|&nbsp; 🌅 日出 {daily_data['sunrise']} &nbsp;|&nbsp; 🌇 日落 {daily_data['sunset']}</p>
-      </td>
-    </tr>
-    <!-- 内容区 -->
-    <tr>
-      <td style="padding: 32px 24px 24px;">
-        <!-- 全天概览 -->
-        <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #2D2A26; font-weight: 600; border-bottom: 1px solid #EAE8E1; padding-bottom: 8px;">📊 全天概览</h2>
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 28px;">
+      <td align="center" style="padding: 28px 14px;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 640px; border-collapse: separate; border-spacing: 0; background-color: #FFFFFF; border: 1px solid #D8E5DE; border-radius: 10px; overflow: hidden;">
           <tr>
-            <td width="48%" style="padding: 14px; background-color: #F8F7F5; border-radius: 6px; border: 1px solid #EAE8E1;">
-              <span style="display: block; font-size: 12px; color: #706C64; margin-bottom: 4px;">当前天气</span>
-              <span style="display: block; font-size: 16px; color: #2D2A26; font-weight: 500;">{weathercode_desc(daily_data['weathercode'])}</span>
-            </td>
-            <td width="4%"></td>
-            <td width="48%" style="padding: 14px; background-color: #F8F7F5; border-radius: 6px; border: 1px solid #EAE8E1;">
-              <span style="display: block; font-size: 12px; color: #706C64; margin-bottom: 4px;">气温区间</span>
-              <span style="display: block; font-size: 16px; color: #2D2A26; font-weight: 500;">{daily_data['temp_min']}°C ~ {daily_data['temp_max']}°C</span>
+            <td style="padding: 26px 24px 24px; background-color: #0F343B;">
+              <span style="display: inline-block; padding: 5px 9px; border-radius: 6px; background-color: #DCECE6; color: #0F343B; font-size: 12px; font-weight: 800;">{date_str}</span>
+              <h1 style="margin: 16px 0 6px; color: #FFFFFF; font-size: 30px; line-height: 1.18; font-weight: 850; letter-spacing: 0;">{main_status}</h1>
+              <p style="margin: 0; color: #BFD5D0; font-size: 14px; line-height: 1.65;">{status_note}<br>日出 {daily_data['sunrise']} · 日落 {daily_data['sunset']} · 坐标 {LAT}, {LON}</p>
             </td>
           </tr>
-          <tr><td colspan="3" height="12"></td></tr>
           <tr>
-            <td width="48%" style="padding: 14px; background-color: #F8F7F5; border-radius: 6px; border: 1px solid #EAE8E1;">
-              <span style="display: block; font-size: 12px; color: #706C64; margin-bottom: 4px;">最高降水</span>
-              <span style="display: block; font-size: 16px; font-weight: 500; color: {'#C35338' if daily_data['precip_prob_max'] >= 50 else '#2D2A26'};">{daily_data['precip_prob_max']}% <span style="font-size:12px; color:#8C887F; font-weight:400;">({daily_data['precip_sum']}mm)</span></span>
+            <td style="padding: 22px 24px 8px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: separate; border-spacing: 0 12px;">
+                <tr>
+                  {metric_cell("当前天气", weathercode_desc(daily_data['weathercode']), "全天概览", "#1F2A2E")}
+                  <td width="4%"></td>
+                  {metric_cell("气温区间", f"{daily_data['temp_min']}°C～{daily_data['temp_max']}°C", "最低 / 最高", "#1F2A2E")}
+                </tr>
+                <tr>
+                  {metric_cell("最高降水", f"{daily_data['precip_prob_max']}%", f"累计 {daily_data['precip_sum']}mm", precip_value_color)}
+                  <td width="4%"></td>
+                  {metric_cell("UV / 阵风", f"{daily_data['uv_index_max']} / {daily_data['wind_max']}", "指数 / km/h", uv_value_color)}
+                </tr>
+              </table>
             </td>
-            <td width="4%"></td>
-            <td width="48%" style="padding: 14px; background-color: #F8F7F5; border-radius: 6px; border: 1px solid #EAE8E1;">
-              <span style="display: block; font-size: 12px; color: #706C64; margin-bottom: 4px;">UV / 阵风峰值</span>
-              <span style="display: block; font-size: 16px; color: #2D2A26; font-weight: 500;"><span style="color: {'#B57A1E' if daily_data['uv_index_max'] >= UV_THRESHOLD else 'inherit'};">{daily_data['uv_index_max']}</span> <span style="color: #D3D0C8; font-weight: 400; padding:0 4px;">|</span> {daily_data['wind_max']}<span style="font-size:12px; font-weight:400; color:#706C64;">km/h</span></span>
+          </tr>
+          <tr>
+            <td style="padding: 4px 24px 10px;">
+              <h2 style="margin: 0 0 12px; color: #1F2A2E; font-size: 16px; line-height: 1.3; font-weight: 850;">今日建议</h2>
+              {recs_html}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 24px 18px;">
+              <h2 style="margin: 0 0 10px; color: #1F2A2E; font-size: 16px; line-height: 1.3; font-weight: 850;">{morning_label} <span style="color: #6B7477; font-size: 12px; font-weight: 650;">{morning_start}:00-{morning_end}:00</span></h2>
+              <div style="border: 1px solid #D8E5DE; border-radius: 8px; overflow: hidden; margin-bottom: 22px;">
+                {_build_hourly_table(morning_hours, morning_label)}
+              </div>
+              <h2 style="margin: 0 0 10px; color: #1F2A2E; font-size: 16px; line-height: 1.3; font-weight: 850;">{evening_label} <span style="color: #6B7477; font-size: 12px; font-weight: 650;">{evening_start}:00-{evening_end}:00</span></h2>
+              <div style="border: 1px solid #D8E5DE; border-radius: 8px; overflow: hidden;">
+                {_build_hourly_table(evening_hours, evening_label)}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 17px 24px; background-color: #F2F7F4; border-top: 1px solid #D8E5DE; text-align: center;">
+              <p style="margin: 0; color: #6B7477; font-size: 12px; line-height: 1.6;">本邮件由系统自动生成 · 数据源 Open-Meteo</p>
             </td>
           </tr>
         </table>
-
-        <!-- 建议区 -->
-        <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #2D2A26; font-weight: 600; border-bottom: 1px solid #EAE8E1; padding-bottom: 8px;">💡 今日建议</h2>
-        <div style="margin-bottom: 28px;">
-          {recs_html}
-        </div>
-        
-        <!-- 早间通勤 -->
-        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #2D2A26; font-weight: 600; border-bottom: 1px solid #EAE8E1; padding-bottom: 8px;">🌅 早间通勤 <span style="font-size: 13px; font-weight: 400; color: #8C887F;">({MORNING_START}:00 - {MORNING_END}:00)</span></h2>
-        <div style="margin-bottom: 28px; border: 1px solid #EAE8E1; border-radius: 8px; overflow: hidden;">
-          {_build_hourly_table(morning_hours, '早间通勤')}
-        </div>
-
-        <!-- 晚间通勤 -->
-        <h2 style="margin: 0 0 12px 0; font-size: 16px; color: #2D2A26; font-weight: 600; border-bottom: 1px solid #EAE8E1; padding-bottom: 8px;">🌇 晚间通勤 <span style="font-size: 13px; font-weight: 400; color: #8C887F;">({EVENING_START}:00 - {EVENING_END}:00)</span></h2>
-        <div style="margin-bottom: 8px; border: 1px solid #EAE8E1; border-radius: 8px; overflow: hidden;">
-          {_build_hourly_table(evening_hours, '晚间通勤')}
-        </div>
-      </td>
-    </tr>
-    <!-- 底部信息 -->
-    <tr>
-      <td style="background-color: #FAF9F6; padding: 20px; text-align: center; border-top: 1px solid #EAE8E1;">
-        <p style="margin: 0; color: #9C988F; font-size: 12px; line-height: 1.6;">本邮件由系统自动生成 &nbsp;|&nbsp; 坐标: {LAT}, {LON}</p>
       </td>
     </tr>
   </table>
@@ -392,12 +488,22 @@ def is_workday():
 def main():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 开始获取天气...")
 
-    # 节假日判断：休息日跳过
-    if not is_workday():
-        print("🎉 今天是休息日，无需通勤提醒，跳过发送。")
-        return
+    # 节假日判断：休息日使用假日时段
+    is_work = is_workday()
+    if not is_work:
+        print("🎉 今天是休息日，切换为假日时段 (10:00-22:00)")
+        m_start, m_end = 10, 16  # 白天出门: 10~16点
+        e_start, e_end = 17, 22  # 晚间出门: 17~22点
+    else:
+        m_start, m_end = MORNING_START, MORNING_END
+        e_start, e_end = EVENING_START, EVENING_END
 
-    daily_data, morning_hours, evening_hours = fetch_weather()
+    daily_data, morning_hours, evening_hours = fetch_weather(
+        morning_start=m_start,
+        morning_end=m_end,
+        evening_start=e_start,
+        evening_end=e_end,
+    )
 
     print(
         f"📅 {daily_data['date']} | {weathercode_desc(daily_data['weathercode'])} | "
@@ -448,7 +554,17 @@ def main():
         or decisions["wind_warning"]
     ):
         print("📬 发送天气提醒邮件...")
-        send_email(daily_data, morning_hours, evening_hours, decisions)
+        send_email(
+            daily_data,
+            morning_hours,
+            evening_hours,
+            decisions,
+            morning_start=m_start,
+            morning_end=m_end,
+            evening_start=e_start,
+            evening_end=e_end,
+            is_workday=is_work,
+        )
     else:
         print("✅ 今日天气良好，无需提醒，不发送邮件。")
 
