@@ -184,21 +184,21 @@ def _build_hourly_table(hours, label):
         )
         row_bg = "#FFFFFF" if i % 2 == 0 else "#FAFCFB"
         rows += f"""<tr style="background-color: {row_bg};">
-              <td style="padding: 13px 12px; text-align: left; border-bottom: 1px solid #E8EFEB; font-weight: 700; color: #1F2A2E; white-space: nowrap;">{h['hour']}:00</td>
-              <td style="padding: 13px 12px; text-align: left; border-bottom: 1px solid #E8EFEB; color: #263237; font-weight: 600;">{weathercode_desc(h['weathercode'])}<br><span style="color: #6B7477; font-size: 12px; font-weight: 500;">{h['temp']}°C</span></td>
-              <td style="padding: 13px 12px; text-align: center; border-bottom: 1px solid #E8EFEB;"><span style="display: inline-block; min-width: 54px; padding: 4px 8px; border-radius: 6px; background-color: {precip_bg}; color: {precip_color}; font-weight: {precip_fw};">{precip_prob}%</span><br><span style="color: #7B8588; font-size: 12px; font-weight: 500;">{h['precip']}mm</span></td>
-              <td style="padding: 13px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; color: {uv_color}; font-weight: {uv_fw};">{uv}</td>
-              <td style="padding: 13px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; color: {gust_color}; font-size: 13px; font-weight: 600;">{h['wind_gust']}<span style="font-size:11px; color: #7B8588;">km/h</span></td>
+              <td style="padding: 12px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; font-weight: 700; color: #1F2A2E; white-space: nowrap;">{h['hour']}:00</td>
+              <td style="padding: 12px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; color: #263237; font-weight: 600;">{weathercode_desc(h['weathercode'])}<br><span style="color: #6B7477; font-size: 12px; font-weight: 500;">{h['temp']}°C</span></td>
+              <td style="padding: 12px 10px; text-align: center; border-bottom: 1px solid #E8EFEB;"><span style="display: inline-block; padding: 3px 6px; border-radius: 6px; background-color: {precip_bg}; color: {precip_color}; font-weight: {precip_fw};">{precip_prob}%</span><br><span style="color: #7B8588; font-size: 12px; font-weight: 500;">{h['precip']}mm</span></td>
+              <td style="padding: 12px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; color: {uv_color}; font-weight: {uv_fw};">{uv}</td>
+              <td style="padding: 12px 10px; text-align: center; border-bottom: 1px solid #E8EFEB; color: {gust_color}; font-size: 13px; font-weight: 600;">{h['wind_gust']}<span style="font-size:11px; color: #7B8588;">km/h</span></td>
             </tr>"""
 
     return f"""<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 14px; background-color: #FFFFFF; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <thead>
             <tr style="background-color: #EEF5F1;">
-              <th style="padding: 11px 12px; font-weight: 700; color: #536268; text-align: left; border-bottom: 1px solid #D8E5DE;">时间</th>
-              <th style="padding: 11px 12px; font-weight: 700; color: #536268; text-align: left; border-bottom: 1px solid #D8E5DE;">天气</th>
-              <th style="padding: 11px 12px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">降水</th>
-              <th style="padding: 11px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">UV</th>
-              <th style="padding: 11px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">阵风</th>
+              <th style="padding: 12px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">时间</th>
+              <th style="padding: 12px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">天气</th>
+              <th style="padding: 12px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">降水</th>
+              <th style="padding: 12px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">UV</th>
+              <th style="padding: 12px 10px; font-weight: 700; color: #536268; text-align: center; border-bottom: 1px solid #D8E5DE;">阵风</th>
             </tr>
           </thead>
           <tbody>{rows}</tbody>
@@ -266,7 +266,7 @@ def send_email(
     def metric_cell(label, value, helper, value_color="#1F2A2E"):
         return f"""<td width="48%" valign="top" style="background-color: #F7FAF8; border: 1px solid #DFE8E3; border-radius: 8px; padding: 14px 15px;">
           <span style="display: block; color: #6B7477; font-size: 12px; line-height: 1.3; margin-bottom: 6px;">{label}</span>
-          <strong style="display: block; color: {value_color}; font-size: 20px; line-height: 1.2; font-weight: 800;">{value}</strong>
+          <strong style="display: block; color: {value_color}; font-size: 18px; line-height: 1.2; font-weight: 800; white-space: nowrap;">{value}</strong>
           <span style="display: block; color: #7B8588; font-size: 12px; line-height: 1.45; margin-top: 5px;">{helper}</span>
         </td>"""
 
@@ -360,17 +360,17 @@ def send_email(
 <body style="margin: 0; padding: 0; background-color: #EAF1EE; font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #1F2A2E;">
   <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #EAF1EE;">
     <tr>
-      <td align="center" style="padding: 28px 14px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 640px; border-collapse: separate; border-spacing: 0; background-color: #FFFFFF; border: 1px solid #D8E5DE; border-radius: 10px; overflow: hidden;">
+      <td align="center" style="padding: 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 32px auto; border-collapse: separate; border-spacing: 0; background-color: #FFFFFF; border: 1px solid #D8E5DE; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);">
           <tr>
-            <td style="padding: 26px 24px 24px; background-color: #0F343B;">
+            <td style="padding: 32px 24px 24px; background-color: #0F343B;">
               <span style="display: inline-block; padding: 5px 9px; border-radius: 6px; background-color: #DCECE6; color: #0F343B; font-size: 12px; font-weight: 800;">{date_str}</span>
               <h1 style="margin: 16px 0 6px; color: #FFFFFF; font-size: 30px; line-height: 1.18; font-weight: 850; letter-spacing: 0;">{main_status}</h1>
               <p style="margin: 0; color: #BFD5D0; font-size: 14px; line-height: 1.65;">{status_note}<br>日出 {daily_data['sunrise']} · 日落 {daily_data['sunset']} · 坐标 {LAT}, {LON}</p>
             </td>
           </tr>
           <tr>
-            <td style="padding: 22px 24px 8px;">
+            <td style="padding: 32px 24px 8px;">
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: separate; border-spacing: 0 12px;">
                 <tr>
                   {metric_cell("当前天气", weathercode_desc(daily_data['weathercode']), "全天概览", "#1F2A2E")}
