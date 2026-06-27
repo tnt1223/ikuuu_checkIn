@@ -421,11 +421,16 @@ def send_email(
     msg["To"] = ", ".join(RECEIVER_EMAILS)
 
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL("smtp.qq.com", 465, context=context) as server:
-        server.login(QQ_EMAIL, QQ_AUTH_CODE)
-        server.sendmail(QQ_EMAIL, RECEIVER_EMAILS, msg.as_string())
+    try:
+        with smtplib.SMTP_SSL("smtp.qq.com", 465, context=context) as server:
+            server.login(QQ_EMAIL, QQ_AUTH_CODE)
+            server.sendmail(QQ_EMAIL, RECEIVER_EMAILS, msg.as_string())
+    except (OSError, smtplib.SMTPException) as e:
+        print(f"⚠️ 邮件发送失败: {e}")
+        return False
 
     print(f"✅ 邮件已发送至 {', '.join(RECEIVER_EMAILS)}")
+    return True
 
 
 def _analyze_hours(hours):
@@ -554,7 +559,7 @@ def main():
         or decisions["wind_warning"]
     ):
         print("📬 发送天气提醒邮件...")
-        send_email(
+        sent = send_email(
             daily_data,
             morning_hours,
             evening_hours,
@@ -565,6 +570,8 @@ def main():
             evening_end=e_end,
             is_workday=is_work,
         )
+        if not sent:
+            print("⚠️ 天气提醒邮件未发送成功，但流程继续执行。")
     else:
         print("✅ 今日天气良好，无需提醒，不发送邮件。")
 
